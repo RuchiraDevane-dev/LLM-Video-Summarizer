@@ -31,35 +31,32 @@ def extract_video_id(url):
 
 
 def get_transcript(video_id):
+    try:
+        api = YouTubeTranscriptApi()
 
-    api = YouTubeTranscriptApi()
+        transcript = api.fetch(
+            video_id,
+            languages=["en", "en-GB", "hi"]
+        )
 
-    transcript = api.fetch(
-        video_id,
-        languages=[
-            "en",
-            "en-GB",
-            "hi"
-        ]
-    )
+        transcript_text = ""
 
-    transcript_text = ""
+        for snippet in transcript:
+            start_time = int(snippet.start)
 
-    for snippet in transcript:
+            minutes = start_time // 60
+            seconds = start_time % 60
 
-        start_time = int(snippet.start)
+            timestamp = f"[{minutes:02d}:{seconds:02d}]"
+            transcript_text += f"{timestamp} {snippet.text}\n"
 
-        minutes = start_time // 60
-        seconds = start_time % 60
+        return transcript_text
 
-        timestamp = f"[{minutes:02d}:{seconds:02d}]"
+    except Exception:
+        return None
 
-        transcript_text += f"{timestamp} {snippet.text}\n"
-
-    return transcript_text
 
 def create_vector_store(transcript_text):
-
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200
@@ -80,7 +77,6 @@ def create_vector_store(transcript_text):
 
 
 def generate_summary(transcript_text):
-
     prompt = f"""
 You are an AI YouTube video summarizer.
 
@@ -118,7 +114,6 @@ Transcript:
 
 
 def ask_question(vector_store, question):
-
     docs = vector_store.similarity_search(
         question,
         k=3
@@ -173,39 +168,39 @@ if st.button("Generate Summary"):
 
         if video_id:
 
+            with st.spinner("Extracting transcript..."):
+                transcript_text = get_transcript(video_id)
+
+            if not transcript_text:
+                st.warning(
+                    "Transcript could not be fetched for this video on the deployed server. "
+                    "This usually happens because YouTube blocks cloud server requests. "
+                    "Please try another video with captions enabled, or run the project locally."
+                )
+                st.stop()
+
             try:
-
-                with st.spinner("Extracting transcript..."):
-
-                    transcript_text = get_transcript(video_id)
-
                 with st.spinner("Creating vector database..."):
-
-                    vector_store = create_vector_store(
-                        transcript_text
-                    )
+                    vector_store = create_vector_store(transcript_text)
 
                 with st.spinner("Generating summary using NVIDIA Llama 3..."):
-
-                    summary = generate_summary(
-                        transcript_text
-                    )
+                    summary = generate_summary(transcript_text)
 
                 st.session_state.transcript_text = transcript_text
                 st.session_state.vector_store = vector_store
                 st.session_state.summary = summary
                 st.session_state.video_id = video_id
 
-            except Exception as e:
-
-                st.error(f"Error: {e}")
+            except Exception:
+                st.error(
+                    "Something went wrong while processing the transcript. "
+                    "Please check your NVIDIA API key and dependencies."
+                )
 
         else:
-
             st.error("Invalid YouTube URL")
 
     else:
-
         st.warning("Please enter a YouTube URL")
 
 
@@ -266,9 +261,10 @@ if st.button("Get Answer"):
                 )
 
             st.subheader("Answer")
-
             st.write(answer)
 
-        except Exception as e:
+        except Exception:
 
-            st.error(f"Error: {e}")
+            st.error(
+                "Could not generate answer. Please try again."
+            )
