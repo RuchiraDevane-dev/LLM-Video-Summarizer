@@ -1,0 +1,8 @@
+streamlit
+youtube-transcript-api
+python-dotenv
+openai
+langchain
+langchain-nvidia-ai-endpoints
+faiss-cpu
+sentence-transformers
