@@ -3,6 +3,7 @@ youtube-transcript-api
 python-dotenv
 openai
 langchain
+langchain-text-splitters
 langchain-nvidia-ai-endpoints
 faiss-cpu
 sentence-transformers
