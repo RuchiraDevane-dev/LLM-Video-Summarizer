@@ -23,18 +23,6 @@ st.set_page_config(
 
 st.title("🎬 AI Video Intelligence Assistant")
 
-language_options = {
-    "English": "en",
-    "Hindi": "hi"
-}
-
-selected_language = st.selectbox(
-    "Select Language",
-    list(language_options.keys())
-)
-
-language_code = language_options[selected_language]
-
 
 def extract_video_id(url):
     pattern = r"(?:v=|youtu\.be/)([0-9A-Za-z_-]{11})"
@@ -42,13 +30,13 @@ def extract_video_id(url):
     return match.group(1) if match else None
 
 
-def get_transcript(video_id, language_code):
+def get_transcript(video_id):
     try:
         api = YouTubeTranscriptApi()
 
         transcript = api.fetch(
             video_id,
-            languages=[language_code, "en"]
+            languages=["en", "en-US", "en-GB", "hi"]
         )
 
         transcript_text = ""
@@ -64,6 +52,40 @@ def get_transcript(video_id, language_code):
 
     except Exception:
         return None
+
+
+def translate_to_english(transcript_text):
+    prompt = f"""
+Translate the following transcript completely into natural English.
+
+Rules:
+- Keep timestamps unchanged.
+- Translate everything into clear English.
+- Do not summarize.
+- Do not skip important content.
+- Output only English text.
+
+Transcript:
+{transcript_text[:12000]}
+"""
+
+    response = client.chat.completions.create(
+        model="meta/llama-3.1-8b-instruct",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a professional translator. Translate all content into English only."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.2,
+        max_tokens=2500
+    )
+
+    return response.choices[0].message.content
 
 
 def create_vector_store(transcript_text):
@@ -83,14 +105,15 @@ def create_vector_store(transcript_text):
     return vector_store
 
 
-def generate_summary(transcript_text, selected_language):
+def generate_summary(transcript_text):
     prompt = f"""
 You are an AI YouTube video summarizer.
 
 IMPORTANT:
-- Always write the complete answer only in {selected_language}.
-- Do not mix English and Hindi.
-- If transcript language is different, translate the meaning into {selected_language}.
+- Always write the complete answer only in English.
+- Do not use Hindi or Hinglish.
+- The transcript is already translated into English.
+- Give a clean and structured summary.
 
 Summarize the following transcript accurately.
 
@@ -111,7 +134,7 @@ Transcript:
         messages=[
             {
                 "role": "system",
-                "content": f"You summarize transcripts accurately. Always respond only in {selected_language}."
+                "content": "You summarize video transcripts accurately. Always respond only in English."
             },
             {
                 "role": "user",
@@ -125,7 +148,7 @@ Transcript:
     return response.choices[0].message.content
 
 
-def ask_question(vector_store, question, transcript_text, selected_language):
+def ask_question(vector_store, question, transcript_text):
     docs = vector_store.similarity_search(question, k=5)
 
     context = "\n\n".join([doc.page_content for doc in docs])
@@ -134,9 +157,9 @@ def ask_question(vector_store, question, transcript_text, selected_language):
 You are an AI video intelligence assistant.
 
 IMPORTANT:
-- Always answer only in {selected_language}.
-- Do not mix English and Hindi.
-- If transcript context is in another language, translate the meaning into {selected_language}.
+- Always answer only in English.
+- Do not use Hindi or Hinglish.
+- The transcript context is already in English.
 
 Your job:
 1. First use the transcript context to answer the question.
@@ -153,7 +176,7 @@ Full Transcript Preview:
 Question:
 {question}
 
-Give a clear and helpful answer only in {selected_language}.
+Give a clear and helpful answer only in English.
 """
 
     response = client.chat.completions.create(
@@ -161,7 +184,7 @@ Give a clear and helpful answer only in {selected_language}.
         messages=[
             {
                 "role": "system",
-                "content": f"You are a helpful AI assistant. Always answer only in {selected_language}."
+                "content": "You are a helpful AI assistant. Always answer only in English."
             },
             {
                 "role": "user",
@@ -186,28 +209,30 @@ if st.button("Generate Summary"):
 
         if video_id:
 
-            with st.spinner(f"Extracting {selected_language} transcript..."):
-                transcript_text = get_transcript(video_id, language_code)
+            with st.spinner("Extracting transcript..."):
+                original_transcript = get_transcript(video_id)
 
-            if not transcript_text:
+            if not original_transcript:
                 st.warning(
-                    f"{selected_language} or English transcript could not be fetched for this video. "
-                    "Please try another video with captions enabled."
+                    "Transcript could not be fetched for this video. "
+                    "Please try another video with English or Hindi captions enabled."
                 )
                 st.stop()
 
             try:
+                with st.spinner("Converting transcript to English..."):
+                    english_transcript = translate_to_english(original_transcript)
+
                 with st.spinner("Creating vector database..."):
-                    vector_store = create_vector_store(transcript_text)
+                    vector_store = create_vector_store(english_transcript)
 
                 with st.spinner("Generating summary using NVIDIA Llama 3..."):
-                    summary = generate_summary(transcript_text, selected_language)
+                    summary = generate_summary(english_transcript)
 
-                st.session_state.transcript_text = transcript_text
+                st.session_state.transcript_text = english_transcript
                 st.session_state.vector_store = vector_store
                 st.session_state.summary = summary
                 st.session_state.video_id = video_id
-                st.session_state.selected_language = selected_language
 
             except Exception as e:
                 st.error("Something went wrong while processing the transcript.")
@@ -227,16 +252,13 @@ if "summary" in st.session_state:
     st.subheader("Video ID")
     st.write(st.session_state.video_id)
 
-    st.subheader("Selected Language")
-    st.write(st.session_state.selected_language)
-
     st.subheader("Transcript Length")
     st.write(f"{len(st.session_state.transcript_text.split())} words")
 
     st.subheader("AI Summary")
     st.write(st.session_state.summary)
 
-    with st.expander("View Transcript"):
+    with st.expander("View English Transcript"):
         st.write(st.session_state.transcript_text[:7000])
 
 
@@ -260,8 +282,7 @@ if st.button("Get Answer"):
                 answer = ask_question(
                     st.session_state.vector_store,
                     user_question,
-                    st.session_state.transcript_text,
-                    st.session_state.selected_language
+                    st.session_state.transcript_text
                 )
 
             st.subheader("Answer")
