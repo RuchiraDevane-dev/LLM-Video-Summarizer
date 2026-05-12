@@ -43,10 +43,8 @@ def get_transcript(video_id):
 
         for snippet in transcript:
             start_time = int(snippet.start)
-
             minutes = start_time // 60
             seconds = start_time % 60
-
             timestamp = f"[{minutes:02d}:{seconds:02d}]"
             transcript_text += f"{timestamp} {snippet.text}\n"
 
@@ -68,10 +66,7 @@ def create_vector_store(transcript_text):
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-    vector_store = FAISS.from_texts(
-        chunks,
-        embeddings
-    )
+    vector_store = FAISS.from_texts(chunks, embeddings)
 
     return vector_store
 
@@ -113,29 +108,30 @@ Transcript:
     return response.choices[0].message.content
 
 
-def ask_question(vector_store, question):
-    docs = vector_store.similarity_search(
-        question,
-        k=3
-    )
+def ask_question(vector_store, question, transcript_text):
+    docs = vector_store.similarity_search(question, k=5)
 
-    context = "\n\n".join(
-        [doc.page_content for doc in docs]
-    )
+    context = "\n\n".join([doc.page_content for doc in docs])
 
     prompt = f"""
-You are an AI assistant.
+You are an AI video intelligence assistant.
 
-Answer ONLY using the provided transcript context.
+Your job:
+1. First use the transcript context to answer the question.
+2. If the question is directly related to the video, answer from the transcript.
+3. If the question is general or simple, answer normally and connect it with the video when possible.
+4. Do not say "not enough information" unless the question is specifically asking for something that is not in the video.
 
-If answer is not present, say:
-"The transcript does not contain enough information."
-
-Context:
+Transcript Context:
 {context}
+
+Full Transcript Preview:
+{transcript_text[:6000]}
 
 Question:
 {question}
+
+Give a clear and helpful answer.
 """
 
     response = client.chat.completions.create(
@@ -143,15 +139,15 @@ Question:
         messages=[
             {
                 "role": "system",
-                "content": "Answer accurately from retrieved transcript chunks."
+                "content": "You are a helpful AI assistant that answers both video-related and general questions clearly."
             },
             {
                 "role": "user",
                 "content": prompt
             }
         ],
-        temperature=0.1,
-        max_tokens=500
+        temperature=0.3,
+        max_tokens=700
     )
 
     return response.choices[0].message.content
@@ -191,11 +187,9 @@ if st.button("Generate Summary"):
                 st.session_state.summary = summary
                 st.session_state.video_id = video_id
 
-            except Exception:
-                st.error(
-                    "Something went wrong while processing the transcript. "
-                    "Please check your NVIDIA API key and dependencies."
-                )
+            except Exception as e:
+                st.error("Something went wrong while processing the transcript.")
+                st.code(str(e))
 
         else:
             st.error("Invalid YouTube URL")
@@ -212,59 +206,41 @@ if "summary" in st.session_state:
     st.write(st.session_state.video_id)
 
     st.subheader("Transcript Length")
-    st.write(
-        f"{len(st.session_state.transcript_text.split())} words"
-    )
+    st.write(f"{len(st.session_state.transcript_text.split())} words")
 
     st.subheader("AI Summary")
     st.write(st.session_state.summary)
 
     with st.expander("View Transcript"):
-        st.write(
-            st.session_state.transcript_text[:7000]
-        )
+        st.write(st.session_state.transcript_text[:7000])
 
 
 st.divider()
 
 st.subheader("💬 Ask Questions About the Video")
 
-user_question = st.text_input(
-    "Enter your question"
-)
+user_question = st.text_input("Enter your question")
 
 if st.button("Get Answer"):
 
     if "vector_store" not in st.session_state:
-
-        st.warning(
-            "First generate the summary."
-        )
+        st.warning("First generate the summary.")
 
     elif not user_question:
-
-        st.warning(
-            "Please enter a question."
-        )
+        st.warning("Please enter a question.")
 
     else:
-
         try:
-
-            with st.spinner(
-                "Retrieving relevant transcript chunks..."
-            ):
-
+            with st.spinner("Generating answer..."):
                 answer = ask_question(
                     st.session_state.vector_store,
-                    user_question
+                    user_question,
+                    st.session_state.transcript_text
                 )
 
             st.subheader("Answer")
             st.write(answer)
 
-        except Exception:
-
-            st.error(
-                "Could not generate answer. Please try again."
-            )
+        except Exception as e:
+            st.error("Could not generate answer.")
+            st.code(str(e))
