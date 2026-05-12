@@ -36,7 +36,7 @@ def get_transcript(video_id):
 
         transcript = api.fetch(
             video_id,
-            languages=["en", "en-GB", "hi"]
+            languages=["en", "en-US", "en-GB"]
         )
 
         transcript_text = ""
@@ -73,6 +73,8 @@ def create_vector_store(transcript_text):
 
 def generate_summary(transcript_text):
     prompt = f"""
+Always respond ONLY in English.
+
 You are an AI YouTube video summarizer.
 
 Summarize the following transcript accurately.
@@ -94,7 +96,7 @@ Transcript:
         messages=[
             {
                 "role": "system",
-                "content": "You summarize transcripts accurately."
+                "content": "You summarize transcripts accurately. Always reply only in English."
             },
             {
                 "role": "user",
@@ -114,6 +116,8 @@ def ask_question(vector_store, question, transcript_text):
     context = "\n\n".join([doc.page_content for doc in docs])
 
     prompt = f"""
+Always respond ONLY in English.
+
 You are an AI video intelligence assistant.
 
 Your job:
@@ -131,7 +135,7 @@ Full Transcript Preview:
 Question:
 {question}
 
-Give a clear and helpful answer.
+Give a clear and helpful answer in English.
 """
 
     response = client.chat.completions.create(
@@ -139,7 +143,7 @@ Give a clear and helpful answer.
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful AI assistant that answers both video-related and general questions clearly."
+                "content": "You are a helpful AI assistant. Always answer only in English."
             },
             {
                 "role": "user",
@@ -164,14 +168,13 @@ if st.button("Generate Summary"):
 
         if video_id:
 
-            with st.spinner("Extracting transcript..."):
+            with st.spinner("Extracting English transcript..."):
                 transcript_text = get_transcript(video_id)
 
             if not transcript_text:
                 st.warning(
-                    "Transcript could not be fetched for this video on the deployed server. "
-                    "This usually happens because YouTube blocks cloud server requests. "
-                    "Please try another video with captions enabled, or run the project locally."
+                    "English transcript could not be fetched for this video. "
+                    "Please try another video with English captions enabled, or run the project locally."
                 )
                 st.stop()
 
@@ -231,7 +234,7 @@ if st.button("Get Answer"):
 
     else:
         try:
-            with st.spinner("Generating answer..."):
+            with st.spinner("Generating answer in English..."):
                 answer = ask_question(
                     st.session_state.vector_store,
                     user_question,
