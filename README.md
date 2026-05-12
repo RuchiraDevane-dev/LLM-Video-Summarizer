@@ -1,30 +1,24 @@
-\# 🎥 LLM Video Summarizer
+\# 🎬 AI YouTube Video Intelligence Assistant
 
 
 
-<div align="center">
+An AI-powered YouTube video analysis application built using Streamlit, NVIDIA Llama 3, FAISS, and LangChain.
 
 
 
-!\[Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge\\\&logo=python)
-
-!\[Streamlit](https://img.shields.io/badge/Streamlit-Framework-red?style=for-the-badge\\\&logo=streamlit)
-
-!\[OpenAI](https://img.shields.io/badge/OpenAI-API-black?style=for-the-badge\\\&logo=openai)
-
-!\[NVIDIA](https://img.shields.io/badge/NVIDIA-NeMo-green?style=for-the-badge\\\&logo=nvidia)
-
-!\[Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow?style=for-the-badge\\\&logo=huggingface)
-
-!\[License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)
+This project can:
 
 
 
-\### 🚀 AI-Powered YouTube Video Summarization using NLP \& Large Language Models
+\* Extract transcripts from YouTube videos
 
+\* Convert Hindi transcripts into English
 
+\* Generate AI-powered summaries
 
-</div>
+\* Answer user questions about the video using RAG (Retrieval-Augmented Generation)
+
+\* Create semantic vector embeddings for intelligent search
 
 
 
@@ -32,45 +26,25 @@
 
 
 
-\## 📌 Overview
+\# 🚀 Features
 
 
 
-LLM Video Summarizer is an AI-powered application that extracts YouTube video transcripts and generates concise, meaningful summaries using Large Language Models (LLMs) and NLP techniques.
+\* 🔗 YouTube video transcript extraction
 
+\* 🌍 Automatic Hindi → English transcript translation
 
+\* 🧠 AI-generated structured summaries
 
-The project integrates:
+\* 💬 Ask questions about any video
 
+\* 📚 FAISS vector database for semantic retrieval
 
+\* 🔎 Embedding-based context search
 
-\* 🧠 NVIDIA NeMo / Nemotron Models
+\* ⚡ NVIDIA Llama 3 inference API integration
 
-\* 🤖 OpenAI API
-
-\* 📚 NLP-based transcript processing
-
-\* 🎬 YouTube Transcript Extraction
-
-\* 🌐 Streamlit Interactive UI
-
-
-
-This project demonstrates practical implementation of:
-
-
-
-\* LLM Inference
-
-\* Prompt Engineering
-
-\* NLP Pipelines
-
-\* AI-based Content Summarization
-
-\* Transcript Processing
-
-\* Real-world AI Application Deployment
+\* 🎨 Clean Streamlit UI
 
 
 
@@ -78,103 +52,49 @@ This project demonstrates practical implementation of:
 
 
 
-\## ✨ Features
+\# 🏗️ Architecture
 
 
 
-✅ Extracts transcripts directly from YouTube videos
+```text
 
-✅ Generates AI-powered concise summaries
+YouTube URL
 
-✅ Handles long-form video content
+&#x20;  ↓
 
-✅ Interactive Streamlit web interface
+Transcript Extraction
 
-✅ NLP-based preprocessing pipeline
+&#x20;  ↓
 
-✅ LLM integration using NVIDIA NeMo/Nemotron \& OpenAI
+Hindi/English Detection
 
-✅ Fast and user-friendly workflow
+&#x20;  ↓
 
+Translation to English
 
+&#x20;  ↓
 
-\---
+Text Chunking
 
+&#x20;  ↓
 
+Embeddings Generation
 
-\## 🛠️ Tech Stack
+&#x20;  ↓
 
+FAISS Vector Database
 
+&#x20;  ↓
 
-| Technology             | Purpose                         |
+Similarity Search (RAG)
 
-| ---------------------- | ------------------------------- |
+&#x20;  ↓
 
-| Python                 | Core Programming Language       |
+Llama 3 Response Generation
 
-| Streamlit              | Frontend UI                     |
+&#x20;  ↓
 
-| OpenAI API             | AI Summarization                |
-
-| NVIDIA NeMo / Nemotron | LLM Integration                 |
-
-| Transformers           | NLP Pipeline                    |
-
-| YouTube Transcript API | Transcript Extraction           |
-
-| dotenv                 | Environment Variable Management |
-
-
-
-\---
-
-
-
-\## 🧠 AI/ML Concepts Used
-
-
-
-\* Natural Language Processing (NLP)
-
-\* Large Language Models (LLMs)
-
-\* Model Inference
-
-\* Prompt Engineering
-
-\* Transcript Chunking
-
-\* AI-based Summarization
-
-\* Context Processing
-
-\* Transformer Models
-
-
-
-\---
-
-
-
-\## 📂 Project Structure
-
-
-
-```bash
-
-LLM-Video-Summarizer/
-
-│
-
-├── app.py
-
-├── requirements.txt
-
-├── .env
-
-├── README.md
-
-└── venv/
+Summary + Q\&A
 
 ```
 
@@ -184,53 +104,73 @@ LLM-Video-Summarizer/
 
 
 
-\## ⚙️ Installation
+\# 🛠️ Tech Stack
 
 
 
-\### 1️⃣ Clone Repository
+\## Frontend
+
+
+
+\* Streamlit
+
+
+
+\## AI / NLP
+
+
+
+\* NVIDIA Llama 3.1 8B
+
+\* LangChain
+
+\* Sentence Transformers
+
+
+
+\## Vector Database
+
+
+
+\* FAISS
+
+
+
+\## Backend / Utilities
+
+
+
+\* Python
+
+\* YouTube Transcript API
+
+\* dotenv
+
+
+
+\---
+
+
+
+\# 📦 Installation
+
+
+
+Clone the repository:
 
 
 
 ```bash
 
-git clone https://github.com/RuchiraDevane-dev/LLM-Video-Summarizer.git
+git clone <your-repository-link>
 
-cd LLM-Video-Summarizer
-
-```
-
-
-
-\### 2️⃣ Create Virtual Environment
-
-
-
-```bash
-
-python -m venv venv
+cd <project-folder>
 
 ```
 
 
 
-\### 3️⃣ Activate Virtual Environment
-
-
-
-\#### Windows
-
-
-
-```bash
-
-venv\\Scripts\\activate
-
-```
-
-
-
-\### 4️⃣ Install Dependencies
+Install dependencies:
 
 
 
@@ -246,23 +186,19 @@ pip install -r requirements.txt
 
 
 
-\## 🔑 Environment Variables
+\# 🔑 Environment Variables
 
 
 
-Create a `.env` file in the root directory:
+Create a `.env` file and add:
 
 
 
 ```env
 
-OPENAI\_API\_KEY=your\_api\_key\_here
+NVIDIA\_API\_KEY=your\_api\_key\_here
 
 ```
-
-
-
-⚠️ Never upload your `.env` file to GitHub.
 
 
 
@@ -270,7 +206,7 @@ OPENAI\_API\_KEY=your\_api\_key\_here
 
 
 
-\## ▶️ Run the Project
+\# ▶️ Run the Project
 
 
 
@@ -286,41 +222,25 @@ streamlit run app.py
 
 
 
-\## 🌍 Deployment
+\# 💡 How It Works
 
 
 
-The project can be deployed using:
+1\. User enters a YouTube video URL
 
+2\. Transcript is extracted using YouTube Transcript API
 
+3\. Hindi transcripts are translated into English
 
-\* Streamlit Community Cloud
+4\. Transcript is split into chunks
 
-\* Render
+5\. Embeddings are generated using MiniLM
 
-\* Hugging Face Spaces
+6\. FAISS stores embeddings for semantic search
 
+7\. Relevant chunks are retrieved using similarity search
 
-
-\---
-
-
-
-\## 🚀 Future Improvements
-
-
-
-\* 🌐 Multi-language summarization
-
-\* 📄 PDF summary export
-
-\* ⏱️ Timestamp-based summaries
-
-\* 🎤 Voice summary generation
-
-\* 📱 Responsive mobile UI
-
-\* 🧩 Multiple LLM support
+8\. NVIDIA Llama 3 generates summaries and answers
 
 
 
@@ -328,39 +248,17 @@ The project can be deployed using:
 
 
 
-\## 📸 Sample Workflow
+\# 📸 Capabilities
 
 
 
-1\. Paste YouTube Video URL 🎥
+\* Works with both Hindi and English videos
 
-2\. Extract Transcript 📄
+\* Generates English summaries only
 
-3\. Process using NLP \& LLMs 🧠
+\* Provides AI-powered question answering
 
-4\. Generate AI Summary ✨
-
-
-
-\---
-
-
-
-\## 👩‍💻 Author
-
-
-
-\### Ruchira Devane
-
-
-
-AI/ML Enthusiast | NLP \& LLM Projects | Python Developer
-
-
-
-\* GitHub: \[https://github.com/RuchiraDevane-dev](https://github.com/RuchiraDevane-dev)
-
-\* LinkedIn: \[https://linkedin.com/in/ruchira-devane](https://linkedin.com/in/ruchira-devane)
+\* Uses RAG pipeline for contextual responses
 
 
 
@@ -368,11 +266,21 @@ AI/ML Enthusiast | NLP \& LLM Projects | Python Developer
 
 
 
-\## ⭐ Support
+\# 🔮 Future Improvements
 
 
 
-If you like this project, give it a ⭐ on GitHub.
+\* Multi-language support
+
+\* Chat history memory
+
+\* PDF export
+
+\* Timestamp-based navigation
+
+\* Video thumbnail preview
+
+\* Voice-based interaction
 
 
 
@@ -380,15 +288,79 @@ If you like this project, give it a ⭐ on GitHub.
 
 
 
-<div align="center">
+\# 🔗 Useful Links
 
 
 
-\### 💡 Built with AI, NLP \& LLM Technologies
+\## GitHub Repository
 
 
 
-</div>
+```text
+
+https://github.com/your-username/your-repository-name
+
+```
+
+
+
+\## NVIDIA API
+
+
+
+```text
+
+https://build.nvidia.com/
+
+```
+
+
+
+\## Streamlit Documentation
+
+
+
+```text
+
+https://docs.streamlit.io/
+
+```
+
+
+
+\## LangChain Documentation
+
+
+
+```text
+
+https://python.langchain.com/
+
+```
+
+
+
+\## FAISS Documentation
+
+
+
+```text
+
+https://faiss.ai/
+
+```
+
+
+
+\---
+
+
+
+\# 👩‍💻 Author
+
+
+
+Ruchira Devane
 
 
 
